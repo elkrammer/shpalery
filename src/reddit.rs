@@ -1,11 +1,17 @@
 use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 
-pub async fn get_posts() -> Result<Vec<Wallpaper>, Box<dyn std::error::Error>> {
+pub async fn get_posts(
+    subreddit: &str,
+    limit: i32,
+) -> Result<Vec<Wallpaper>, Box<dyn std::error::Error>> {
     let mut wall: Vec<Wallpaper> = Vec::new();
     let client = reqwest::Client::builder().build()?;
+
     let res = client
-        .get("https://www.reddit.com/r/wallpaper/hot/.json?limit=5")
+        .get(format!(
+            "https://www.reddit.com/r/{subreddit}/hot/.json?limit={limit}"
+        ))
         .send()
         .await?;
 
