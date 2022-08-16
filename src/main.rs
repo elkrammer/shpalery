@@ -1,3 +1,4 @@
+mod database;
 mod reddit;
 mod wallpaper;
 
@@ -13,8 +14,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         wallpapers.push(posts)
     }
 
-    // for v in wallpapers {
-    //     println!("{:?}", v);
-    // }
+    let db = database::connect().await?;
+    for wall in wallpapers.into_iter().flatten() {
+        database::insert_reddit_entry(&db, &wall).await?;
+    }
     Ok(())
 }

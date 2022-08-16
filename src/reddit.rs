@@ -21,12 +21,15 @@ pub async fn get_posts(
         .expect("Error parsing response");
 
     for item in items {
+        let id = &item["data"]["id"];
         let title = &item["data"]["title"];
         let url = &item["data"]["url"];
 
         let wallpaper = Wallpaper {
+            id: id.to_string(),
             name: title.to_string(),
             href: url.to_string(),
+            hash: id.to_string(),
         };
 
         wall.push(wallpaper);

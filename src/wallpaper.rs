@@ -4,4 +4,6 @@ use serde::{Deserialize, Serialize};
 pub struct Wallpaper {
     pub name: String,
     pub href: String,
+    pub id: String,
+    pub hash: String,
 }
