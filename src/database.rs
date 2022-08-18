@@ -19,15 +19,44 @@ pub async fn migrate(pool: &sqlx::SqlitePool) -> Result<(), sqlx::migrate::Migra
     sqlx::migrate!("./migrations").run(pool).await
 }
 
+pub async fn find_reddit_entry_by_id(
+    pool: &sqlx::SqlitePool,
+    id: &str,
+) -> Result<bool, sqlx::Error> {
+    let (row,): (bool,) =
+        sqlx::query_as("SELECT EXISTS(SELECT 1 FROM reddit_wallpapers WHERE id = ?)")
+            .bind(&id)
+            .fetch_one(pool)
+            .await?;
+
+    Ok(row)
+}
+
 pub async fn insert_reddit_entry(
     pool: &sqlx::SqlitePool,
     wallpaper: &Wallpaper,
-) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
-    sqlx::query("INSERT INTO reddit_wallpapers (id, name, href, hash) values (?, ?, ?, ?)")
-        .bind(&wallpaper.id)
-        .bind(&wallpaper.name)
-        .bind(&wallpaper.href)
-        .bind(&wallpaper.hash)
-        .execute(pool)
-        .await
+) -> Result<(), sqlx::Error> {
+    let exists = find_reddit_entry_by_id(pool, &wallpaper.id).await;
+    match exists {
+        Ok(true) => return Ok(()),
+        Ok(false) => {
+            let _insert = sqlx::query(
+                "INSERT INTO reddit_wallpapers (id, name, href, hash) values (?, ?, ?, ?)",
+            )
+            .bind(&wallpaper.id)
+            .bind(&wallpaper.name)
+            .bind(&wallpaper.href)
+            .bind(&wallpaper.hash)
+            .execute(pool)
+            .await?;
+            println!("Successfully created entry for {:?}", &wallpaper.id);
+            return Ok(());
+        }
+        // TODO: implement better error handling
+        Err(_) => println!(
+            "There was an error inserting wallpaper id {:?} into the reddit_wallpapers",
+            &wallpaper.id
+        ),
+    }
+    Ok(())
 }

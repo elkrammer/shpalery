@@ -26,7 +26,7 @@ pub async fn get_posts(
         let url = &item["data"]["url"];
 
         let wallpaper = Wallpaper {
-            id: id.to_string(),
+            id: id.to_string().replace('"', ""),
             name: title.to_string(),
             href: url.to_string(),
             hash: id.to_string(),
