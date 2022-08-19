@@ -35,28 +35,27 @@ pub async fn find_reddit_entry_by_id(
 pub async fn insert_reddit_entry(
     pool: &sqlx::SqlitePool,
     wallpaper: &Wallpaper,
-) -> Result<(), sqlx::Error> {
+) -> Result<bool, sqlx::Error> {
     let exists = find_reddit_entry_by_id(pool, &wallpaper.id).await;
     match exists {
-        Ok(true) => return Ok(()),
+        Ok(true) => return Ok(false),
         Ok(false) => {
-            let _insert = sqlx::query(
-                "INSERT INTO reddit_wallpapers (id, name, href, hash) values (?, ?, ?, ?)",
-            )
-            .bind(&wallpaper.id)
-            .bind(&wallpaper.name)
-            .bind(&wallpaper.href)
-            .bind(&wallpaper.hash)
-            .execute(pool)
-            .await?;
-            println!("Successfully created entry for {:?}", &wallpaper.id);
-            return Ok(());
+            sqlx::query("INSERT INTO reddit_wallpapers (id, name, href, hash) values (?, ?, ?, ?)")
+                .bind(&wallpaper.id)
+                .bind(&wallpaper.name)
+                .bind(&wallpaper.href)
+                .bind(&wallpaper.hash)
+                .execute(pool)
+                .await?;
+            return Ok(true);
         }
         // TODO: implement better error handling
-        Err(_) => println!(
-            "There was an error inserting wallpaper id {:?} into the reddit_wallpapers",
-            &wallpaper.id
-        ),
+        Err(_) => {
+            println!(
+                "There was an error inserting wallpaper id {:?} into the reddit_wallpapers",
+                &wallpaper.id
+            );
+            return Ok(false);
+        }
     }
-    Ok(())
 }
