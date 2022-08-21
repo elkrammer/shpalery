@@ -1,3 +1,4 @@
+use crate::lib::string_ends_with_any;
 use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
@@ -21,14 +22,21 @@ pub async fn get_subreddit_wallpapers(
         .expect("Error parsing response");
 
     for item in items {
-        let id = &item["data"]["id"];
-        let title = &item["data"]["title"];
-        let url = &item["data"]["url"];
+        let id: &str = &item["data"]["id"].to_string().replace('"', "");
+        let name: &str = &item["data"]["title"].to_string().replace('"', "");
+        let url: &str = &item["data"]["url"].to_string().replace('"', "");
+
+        let valid_image_suffixes = vec!["jpg", "png"];
+
+        // skip item if it's not an image file
+        if !(string_ends_with_any(url.to_string(), valid_image_suffixes)) {
+            continue;
+        }
 
         let wallpaper = Wallpaper {
-            id: id.to_string().replace('"', ""),
-            name: title.to_string().replace('"', ""),
-            href: url.to_string().replace('"', ""),
+            id: id.to_string(),
+            name: name.to_string(),
+            href: url.to_string(),
             hash: "".to_string(),
         };
 

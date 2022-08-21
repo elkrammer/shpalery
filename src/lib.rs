@@ -10,3 +10,7 @@ pub fn get_file_hash(path: &PathBuf) -> Result<String, Box<dyn std::error::Error
     let string = format!("{:x}", hash);
     Ok(string)
 }
+
+pub fn string_ends_with_any(s: String, suffixes: Vec<&str>) -> bool {
+    return suffixes.iter().any(|&suffix| s.ends_with(suffix));
+}
