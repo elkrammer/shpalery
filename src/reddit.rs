@@ -2,7 +2,7 @@ use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
 use std::io::copy;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub async fn get_subreddit_wallpapers(
     subreddit: &str,
@@ -30,7 +30,7 @@ pub async fn get_subreddit_wallpapers(
             id: id.to_string().replace('"', ""),
             name: title.to_string().replace('"', ""),
             href: url.to_string().replace('"', ""),
-            hash: id.to_string().replace('"', ""),
+            hash: "".to_string(),
         };
 
         wallpapers.push(wallpaper);
@@ -42,8 +42,9 @@ pub async fn get_subreddit_wallpapers(
 pub async fn download_wallpaper(
     url: &str,
     tmp_dir: &Path,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
+    let wallfile;
     let mut dest = {
         let fname = response
             .url()
@@ -51,13 +52,11 @@ pub async fn download_wallpaper(
             .and_then(|segments| segments.last())
             .and_then(|name| if name.is_empty() { None } else { Some(name) })
             .unwrap_or("tmp.bin");
-        println!("Downloading {}", fname);
-
-        let fname = tmp_dir.join(fname);
-        File::create(fname)?
+        wallfile = tmp_dir.join(fname);
+        File::create(wallfile.clone())?
     };
 
     let content = response.text().await?;
     copy(&mut content.as_bytes(), &mut dest)?;
-    Ok(())
+    Ok(wallfile)
 }

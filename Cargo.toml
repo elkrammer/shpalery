@@ -14,3 +14,4 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite", "migrate" ] }
 tempfile = { version = "3" }
+sha2 = { version = "0.10" }
