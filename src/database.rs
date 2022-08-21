@@ -34,13 +34,15 @@ pub async fn insert_reddit_entry(
     pool: &sqlx::SqlitePool,
     wallpaper: &Wallpaper,
 ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
-    let insert =
-        sqlx::query("INSERT INTO reddit_wallpapers (id, name, href, hash) values (?, ?, ?, ?)")
-            .bind(&wallpaper.id)
-            .bind(&wallpaper.name)
-            .bind(&wallpaper.href)
-            .bind(&wallpaper.hash)
-            .execute(pool)
-            .await?;
+    let insert = sqlx::query(
+        "INSERT INTO reddit_wallpapers (id, name, href, subreddit, hash) values (?, ?, ?, ?, ?)",
+    )
+    .bind(&wallpaper.id)
+    .bind(&wallpaper.name)
+    .bind(&wallpaper.href)
+    .bind(&wallpaper.hash)
+    .bind(&wallpaper.subreddit)
+    .execute(pool)
+    .await?;
     Ok(insert)
 }

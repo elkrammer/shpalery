@@ -1,3 +1,4 @@
+use crate::database;
 use crate::lib::string_ends_with_any;
 use crate::wallpaper::Wallpaper;
 use serde_json::Value;
@@ -11,7 +12,11 @@ pub async fn get_subreddit_wallpapers(
 ) -> Result<Vec<Wallpaper>, Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Wallpaper> = Vec::new();
     let client = reqwest::Client::builder().build()?;
-    let sub_url = format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={limit}");
+    let db = database::connect().await?;
+
+    let smart_limit = limit + 20; // get extra wallpapers in case we need to skip an item due to already having it
+    let sub_url =
+        format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={smart_limit}");
 
     let res = client.get(sub_url).send().await?;
     let json: Value = serde_json::from_str(&res.text().await?)?;
@@ -26,6 +31,11 @@ pub async fn get_subreddit_wallpapers(
 
         let valid_image_suffixes = vec!["jpg", "png"];
 
+        // skip item if already in db
+        if let Ok(true) = database::find_reddit_entry_by_id(&db, id).await {
+            continue;
+        }
+
         // skip item if it's not an image file
         if !(string_ends_with_any(url.to_string(), valid_image_suffixes)) {
             continue;
@@ -35,6 +45,7 @@ pub async fn get_subreddit_wallpapers(
             id: id.to_string(),
             name: name.to_string(),
             href: url.to_string(),
+            subreddit: subreddit.to_string(),
             hash: "".to_string(),
         };
 
