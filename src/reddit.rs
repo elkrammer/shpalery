@@ -1,7 +1,6 @@
 use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
-use std::io::copy;
 use std::path::{Path, PathBuf};
 
 pub async fn get_subreddit_wallpapers(
@@ -55,8 +54,7 @@ pub async fn download_wallpaper(
         wallfile = tmp_dir.join(fname);
         File::create(wallfile.clone())?
     };
-
-    let content = response.text().await?;
-    copy(&mut content.as_bytes(), &mut dest)?;
+    let mut content = std::io::Cursor::new(response.bytes().await?);
+    std::io::copy(&mut content, &mut dest)?;
     Ok(wallfile)
 }
