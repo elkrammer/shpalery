@@ -6,16 +6,14 @@ use std::path::{Path, PathBuf};
 
 pub async fn get_subreddit_wallpapers(
     subreddit: &str,
+    fetch_type: &str,
     limit: i32,
 ) -> Result<Vec<Wallpaper>, Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Wallpaper> = Vec::new();
     let client = reqwest::Client::builder().build()?;
-    let res = client
-        .get(format!(
-            "https://www.reddit.com/r/{subreddit}/hot/.json?limit={limit}"
-        ))
-        .send()
-        .await?;
+    let sub_url = format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={limit}");
+
+    let res = client.get(sub_url).send().await?;
     let json: Value = serde_json::from_str(&res.text().await?)?;
     let items = json["data"]["children"]
         .as_array()

@@ -13,11 +13,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // TODO: make this configurable
     // let subreddits = vec!["wallpaper", "wallpapers", "EarthPorn", "SkyPorn"];
-    let subreddits = vec!["wallpaper"];
+    let subreddits = vec!["wallpaper", "wallpapers"];
 
     // TODO: make limit configurable
     for sr in subreddits.into_iter() {
-        let posts: Vec<Wallpaper> = reddit::get_subreddit_wallpapers(&sr, 5).await?;
+        // TODO: allow use of other fetch_types. one of (hour, day, week, month, year, all)
+        let posts: Vec<Wallpaper> = reddit::get_subreddit_wallpapers(&sr, "hot", 5).await?;
         wallpapers.push(posts)
     }
 
