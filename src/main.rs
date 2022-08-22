@@ -4,17 +4,17 @@ mod reddit;
 mod wallpaper;
 
 use crate::wallpaper::Wallpaper;
+use rand::seq::SliceRandom;
 use std::path::Path;
 use tempfile::Builder;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
-
     // TODO: make this configurable
     // let subreddits = vec!["wallpaper", "wallpapers", "EarthPorn", "SkyPorn"];
     let subreddits = vec!["wallpaper", "EarthPorn"];
-    let amount: i32 = 5;
+    let amount: i32 = 10;
+    let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
 
     for sr in subreddits.into_iter() {
         // TODO: allow use of other fetch_types. one of (hour, day, week, month, year, all)
@@ -22,7 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         wallpapers.push(posts)
     }
 
-    // TODO: shuffle collected wallpapers
+    // shuffle collected wallpapers
+    let mut wallpapers: Vec<Wallpaper> = wallpapers.into_iter().flatten().collect();
+    wallpapers.shuffle(&mut rand::thread_rng());
 
     let db = database::connect().await?;
     let tmp_dir = Builder::new().prefix("shpalery").rand_bytes(2).tempdir()?;
@@ -35,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Temp dir is set to: {}", tmp_dir.display());
 
     let mut download_count: i32 = 0;
-    for mut wall in wallpapers.into_iter().flatten() {
+    for mut wall in wallpapers.into_iter() {
         println!("Downloading wallpaper {}/{}", download_count, amount);
         // if desired amount of wallpapers is met we can break out of this loop
         if download_count >= amount {
