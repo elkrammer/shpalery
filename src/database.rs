@@ -30,6 +30,18 @@ pub async fn find_reddit_entry_by_id(
     Ok(row)
 }
 
+pub async fn find_reddit_entry_by_hash(
+    pool: &sqlx::SqlitePool,
+    hash: &str,
+) -> Result<bool, sqlx::Error> {
+    let (row,): (bool,) =
+        sqlx::query_as("SELECT EXISTS(SELECT 1 FROM reddit_wallpapers WHERE hash = ?)")
+            .bind(&hash)
+            .fetch_one(pool)
+            .await?;
+    Ok(row)
+}
+
 pub async fn insert_reddit_entry(
     pool: &sqlx::SqlitePool,
     wallpaper: &Wallpaper,

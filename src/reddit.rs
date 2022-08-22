@@ -8,15 +8,15 @@ use std::path::{Path, PathBuf};
 pub async fn get_subreddit_wallpapers(
     subreddit: &str,
     fetch_type: &str,
-    limit: i32,
+    amount: i32,
 ) -> Result<Vec<Wallpaper>, Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Wallpaper> = Vec::new();
     let client = reqwest::Client::builder().build()?;
     let db = database::connect().await?;
 
-    let smart_limit = limit + 20; // get extra wallpapers in case we need to skip an item due to already having it
+    let buffer_limit = amount + 30; // get extra wallpapers in case we need to skip an item due to already having it
     let sub_url =
-        format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={smart_limit}");
+        format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={buffer_limit}");
 
     let res = client.get(sub_url).send().await?;
     let json: Value = serde_json::from_str(&res.text().await?)?;

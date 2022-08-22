@@ -6,13 +6,14 @@ mod wallpaper;
 use crate::wallpaper::Wallpaper;
 use rand::seq::SliceRandom;
 use std::path::Path;
+use std::process;
 use tempfile::Builder;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: make this configurable
     // let subreddits = vec!["wallpaper", "wallpapers", "EarthPorn", "SkyPorn"];
-    let subreddits = vec!["wallpaper", "EarthPorn"];
+    let subreddits = vec!["wallpaper", "wallpapers"];
     let amount: i32 = 10;
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
 
@@ -34,27 +35,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dst_dir = Path::new("/home/elkrammer/tmp/wallpapers");
     // TODO: get all file hashes for dst_dir and add comparisson for downloaded tmp wall?
 
-    println!("Temp dir is set to: {}", tmp_dir.display());
+    // println!("Temp dir is set to: {}", tmp_dir.display());
+
+    if wallpapers.is_empty() {
+        println!("Sorry, there's no more wallpapers to download");
+        process::exit(1);
+    }
 
     let mut download_count: i32 = 0;
+
     for mut wall in wallpapers.into_iter() {
-        println!("Downloading wallpaper {}/{}", download_count, amount);
+        println!("Downloading [{}/{}]\r", download_count, amount);
+
         // if desired amount of wallpapers is met we can break out of this loop
         if download_count >= amount {
             break;
         }
 
-        // check if current item already exists in db - if so then skip it
+        // check if current item's id already exists in db - if so then skip it
         if let Ok(true) = database::find_reddit_entry_by_id(&db, &wall.id).await {
             continue;
         }
 
-        // download wallpaper & get file hash
+        // download wallpaper file
         let w_file = reddit::download_wallpaper(&wall.href, &tmp_dir).await?;
-        wall.hash = lib::get_file_hash(&w_file)?;
-        println!("Downloading {} from /r/{}", &wall.name, &wall.subreddit);
 
-        // println!("Wallpaper: {:?}", wall);
+        // hash check
+        // check if downloaded wallpaper is already present in our inventory
+        // the wallpaper we download might be a cross-post to another subreddit - in this case
+        // it will have a different id, thus this check
+        wall.hash = lib::get_file_hash(&w_file)?;
+        if let Ok(true) = database::find_reddit_entry_by_hash(&db, &wall.hash).await {
+            println!("Hash {} already present in db", &wall.hash);
+            continue;
+        }
 
         // copy file to final destination
         let filename = w_file.file_name().unwrap();
@@ -65,6 +79,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             download_count += 1;
         }
     }
-    println!("Total Downloaded Wallpapers: {}", download_count);
     Ok(())
 }
