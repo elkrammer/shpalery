@@ -5,6 +5,7 @@ mod wallpaper;
 
 use crate::wallpaper::Wallpaper;
 use rand::seq::SliceRandom;
+use std::io::Write;
 use std::path::Path;
 use std::process;
 use tempfile::Builder;
@@ -18,8 +19,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
 
     for sr in subreddits.into_iter() {
-        // TODO: allow use of other fetch_types. one of (hour, day, week, month, year, all)
-        let posts: Vec<Wallpaper> = reddit::get_subreddit_wallpapers(&sr, "hot", amount).await?;
+        // TODO: make fetch_type configurable
+        //  one of hot, top(hour, day, week, month, year, all)
+        let posts: Vec<Wallpaper> = reddit::get_subreddit_wallpapers(&sr, "year", amount).await?;
         wallpapers.push(posts)
     }
 
@@ -27,25 +29,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Wallpaper> = wallpapers.into_iter().flatten().collect();
     wallpapers.shuffle(&mut rand::thread_rng());
 
+    if wallpapers.is_empty() {
+        println!("Sorry, there's no more wallpapers to download");
+        process::exit(1);
+    }
+
     let db = database::connect().await?;
     let tmp_dir = Builder::new().prefix("shpalery").rand_bytes(2).tempdir()?;
     let tmp_dir = tmp_dir.path();
 
     // TODO: make dst_dir configurable
     let dst_dir = Path::new("/home/elkrammer/tmp/wallpapers");
+
     // TODO: get all file hashes for dst_dir and add comparisson for downloaded tmp wall?
-
-    // println!("Temp dir is set to: {}", tmp_dir.display());
-
-    if wallpapers.is_empty() {
-        println!("Sorry, there's no more wallpapers to download");
-        process::exit(1);
-    }
-
     let mut download_count: i32 = 0;
-
     for mut wall in wallpapers.into_iter() {
-        println!("Downloading [{}/{}]\r", download_count, amount);
+        print!("\rDownloading [{}/{}]", download_count, amount);
+        std::io::stdout().flush()?;
 
         // if desired amount of wallpapers is met we can break out of this loop
         if download_count >= amount {
