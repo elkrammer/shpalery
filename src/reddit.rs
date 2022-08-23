@@ -13,10 +13,15 @@ pub async fn get_subreddit_wallpapers(
     let mut wallpapers: Vec<Wallpaper> = Vec::new();
     let client = reqwest::Client::builder().build()?;
     let db = database::connect().await?;
+    let buffer_limit = amount + 30; // get extra wallpapers in case we need to skip items
 
-    let buffer_limit = amount + 30; // get extra wallpapers in case we need to skip an item due to already having it
-    let sub_url =
-        format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={buffer_limit}");
+    let sub_url: String = if fetch_type == "hot" {
+        format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={buffer_limit}")
+    } else {
+        format!(
+            "https://www.reddit.com/r/{subreddit}/top/.json?t={fetch_type}&limit={buffer_limit}"
+        )
+    };
 
     let res = client.get(sub_url).send().await?;
     let json: Value = serde_json::from_str(&res.text().await?)?;
