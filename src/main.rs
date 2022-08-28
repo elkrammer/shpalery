@@ -1,8 +1,3 @@
-mod database;
-mod lib;
-mod reddit;
-mod wallpaper;
-
 use crate::wallpaper::Wallpaper;
 use rand::seq::SliceRandom;
 use std::io::Write;
@@ -10,18 +5,25 @@ use std::path::Path;
 use std::process;
 use tempfile::Builder;
 
+use crate::config::Config;
+
+mod config;
+mod database;
+mod lib;
+mod reddit;
+mod wallpaper;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: make this configurable
     // let subreddits = vec!["wallpaper", "wallpapers", "EarthPorn", "SkyPorn"];
-    let subreddits = vec!["wallpaper", "wallpapers"];
-    let amount: i32 = 10;
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
+    let config = Config::load();
+    println!("Config: {:?}", config);
 
-    for sr in subreddits.into_iter() {
-        // TODO: make fetch_type configurable
-        //  one of hot, top(hour, day, week, month, year, all)
-        let posts: Vec<Wallpaper> = reddit::get_subreddit_wallpapers(&sr, "year", amount).await?;
+    for sr in config.subreddits.into_iter() {
+        let posts: Vec<Wallpaper> =
+            reddit::get_subreddit_wallpapers(&sr, &config.fetch_type, config.amount).await?;
         wallpapers.push(posts)
     }
 
@@ -44,11 +46,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: get all file hashes for dst_dir and add comparisson for downloaded tmp wall?
     let mut download_count: i32 = 0;
     for mut wall in wallpapers.into_iter() {
-        print!("\rDownloading [{}/{}]", download_count, amount);
+        print!("\rDownloading [{}/{}]", download_count, config.amount);
         std::io::stdout().flush()?;
 
         // if desired amount of wallpapers is met we can break out of this loop
-        if download_count >= amount {
+        if download_count >= config.amount {
             break;
         }
 

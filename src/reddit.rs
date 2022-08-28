@@ -4,6 +4,7 @@ use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use std::process;
 
 pub async fn get_subreddit_wallpapers(
     subreddit: &str,
@@ -14,6 +15,13 @@ pub async fn get_subreddit_wallpapers(
     let client = reqwest::Client::builder().build()?;
     let db = database::connect().await?;
     let buffer_limit = amount + 30; // get extra wallpapers in case we need to skip items
+
+    let valid_fetch_types: Vec<&str> = vec!["hot", "hour", "day", "week", "month", "year", "all"];
+    if !(string_ends_with_any(fetch_type.to_string(), valid_fetch_types)) {
+        println!("Invalid fetch type");
+        println!("Fetch Type has to be one of: hot, hour, day, week, month, year, all");
+        process::exit(1);
+    }
 
     let sub_url: String = if fetch_type == "hot" {
         format!("https://www.reddit.com/r/{subreddit}/{fetch_type}/.json?limit={buffer_limit}")

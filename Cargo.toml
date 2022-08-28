@@ -15,3 +15,5 @@ sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite", "migrat
 tempfile = { version = "3" }
 sha2 = { version = "0.10" }
 rand = { version = "0.8.5" }
+directories = { version = "2.0" }
+toml = { version = "0.5.9" }

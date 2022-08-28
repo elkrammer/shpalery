@@ -1,13 +1,13 @@
 # 🖼️ shpalery
 
-> shpalery • шпалери
->
-> wallpaper in Ukrainian 🇺🇦  - #StandWithUkrain
+> shpalery • шпалери —  wallpaper in Ukrainian  🇺🇦
+> 
+> #StandWithUkrain
 
 I like rotating my desktop wallpaper on a daily basis so I made this tool to get me some fresh wallpapers to add to my collection.
 This is currently in very early early stages, don't expect it to work or to produce anything really usable right now.
 
-## 🎅 Features
+## ⚔️ Features
 
 - Written in Rust, btw 🙈 (although very bad Rust as i'm fairly new to the language)
 - Gets wallpapers from reddit using their Free API. No credentials needed
