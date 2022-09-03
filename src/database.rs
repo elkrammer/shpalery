@@ -1,7 +1,8 @@
 use crate::wallpaper::Wallpaper;
+use crate::Config;
 
 pub async fn connect() -> Result<sqlx::SqlitePool, sqlx::Error> {
-    let db_path = &"file:///tmp/shpalery.db";
+    let db_path = Config::get_database_file();
     let pool = sqlx::pool::PoolOptions::new()
         .connect_with(
             sqlx::sqlite::SqliteConnectOptions::new()

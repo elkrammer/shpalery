@@ -23,7 +23,7 @@ impl Default for Config {
             amount: 10,
             fetch_type: "hot".to_string(),
             subreddits: vec!["wallpaper".to_string(), "wallpapers".to_string()],
-            download_dir: Self::get_data_dir(),
+            download_dir: Self::get_wallpapers_data_dir(),
         }
     }
 }
@@ -43,13 +43,24 @@ impl Config {
     }
 
     pub fn get_data_dir() -> PathBuf {
-        let project_dir = Self::project_dir();
-        let data_dir = project_dir.data_dir().join("wallpapers");
+        let data_dir = Self::project_dir().data_dir().to_owned();
 
         if !data_dir.exists() {
             Self::create_data_dir(&data_dir).unwrap();
         }
         data_dir.to_path_buf()
+    }
+
+    pub fn get_database_file() -> PathBuf {
+        Self::project_dir().data_dir().join("shpalery.db")
+    }
+
+    pub fn get_wallpapers_data_dir() -> PathBuf {
+        let wallpapers_dir = Self::get_data_dir().join("wallpapers");
+        if !wallpapers_dir.exists() {
+            Self::create_data_dir(&wallpapers_dir).unwrap();
+        }
+        wallpapers_dir
     }
 
     pub fn create_data_dir(data_dir: &Path) -> Result<(), std::io::Error> {
