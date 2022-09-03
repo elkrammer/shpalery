@@ -1,7 +1,6 @@
 use crate::wallpaper::Wallpaper;
 use rand::seq::SliceRandom;
 use std::io::Write;
-use std::path::Path;
 use std::process;
 use tempfile::Builder;
 
@@ -15,11 +14,9 @@ mod wallpaper;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // TODO: make this configurable
-    // let subreddits = vec!["wallpaper", "wallpapers", "EarthPorn", "SkyPorn"];
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
     let config = Config::load();
-    println!("Config: {:?}", config);
+    println!("{:?}", config);
 
     for sr in config.subreddits.into_iter() {
         let posts: Vec<Wallpaper> =
@@ -27,21 +24,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         wallpapers.push(posts)
     }
 
-    // shuffle collected wallpapers
-    let mut wallpapers: Vec<Wallpaper> = wallpapers.into_iter().flatten().collect();
-    wallpapers.shuffle(&mut rand::thread_rng());
-
     if wallpapers.is_empty() {
         println!("Sorry, there's no more wallpapers to download");
         process::exit(1);
     }
 
+    // shuffle collected wallpapers
+    let mut wallpapers: Vec<Wallpaper> = wallpapers.into_iter().flatten().collect();
+    wallpapers.shuffle(&mut rand::thread_rng());
+
     let db = database::connect().await?;
     let tmp_dir = Builder::new().prefix("shpalery").rand_bytes(2).tempdir()?;
     let tmp_dir = tmp_dir.path();
 
-    // TODO: make dst_dir configurable
-    let dst_dir = Path::new("/home/elkrammer/tmp/wallpapers");
+    let dst_dir = config.download_dir;
 
     // TODO: get all file hashes for dst_dir and add comparisson for downloaded tmp wall?
     let mut download_count: i32 = 0;
