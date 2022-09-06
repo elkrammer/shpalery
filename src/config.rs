@@ -1,3 +1,4 @@
+use colored::Colorize;
 use directories::ProjectDirs;
 use figment::{
     providers::{Env, Format, Serialized, Toml},
@@ -39,13 +40,13 @@ impl Config {
     }
 
     pub fn project_dir() -> ProjectDirs {
-        ProjectDirs::from("com", "elkrammer", "shpalery").expect("Couldn't create project dir")
+        ProjectDirs::from("com", "elkrammer", "shpalery").expect("Couldn't set project dir")
     }
 
     pub fn get_data_dir() -> PathBuf {
         let data_dir = Self::project_dir().data_dir().to_owned();
-
         if !data_dir.exists() {
+            println!("Data dir {} doesn't exist, creating...", data_dir.display());
             Self::create_data_dir(&data_dir).unwrap();
         }
         data_dir.to_path_buf()
@@ -68,5 +69,18 @@ impl Config {
             fs::create_dir_all(data_dir)?;
         }
         Ok(())
+    }
+
+    pub fn print_config() {
+        println!(
+            "\
+            {}{}\n\
+            {}{}\n\
+            ",
+            format!("Wallpapers Path : ").blue().bold(),
+            Self::get_wallpapers_data_dir().display(),
+            format!("Database Path   : ").yellow().bold(),
+            Self::get_database_file().display()
+        );
     }
 }

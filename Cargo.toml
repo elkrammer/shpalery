@@ -17,3 +17,4 @@ sha2 = { version = "0.10" }
 rand = { version = "0.8.5" }
 directories = { version = "2.0" }
 figment = { version = "0.10", features = ["toml", "env"] }
+colored = {version = "2.0" }

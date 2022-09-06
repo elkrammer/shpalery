@@ -16,7 +16,8 @@ mod wallpaper;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
     let config = Config::load();
-    println!("{:?}", config);
+
+    Config::print_config();
 
     for sr in config.subreddits.into_iter() {
         let posts: Vec<Wallpaper> =
