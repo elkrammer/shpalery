@@ -1,10 +1,13 @@
 use crate::wallpaper::Wallpaper;
+use clap::Parser;
 use rand::seq::SliceRandom;
 use std::process;
 use wallpaper::process_wallpaper_batch;
 
+use crate::args::ShpaleryArgs;
 use crate::config::Config;
 
+mod args;
 mod config;
 mod database;
 mod lib;
@@ -14,11 +17,16 @@ mod wallpaper;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut wallpapers: Vec<Vec<Wallpaper>> = Vec::new();
-    let config = Config::load();
+    let mut config = Config::load();
+    let args = ShpaleryArgs::parse();
 
-    Config::print_config();
+    if let Some(amount) = args.amount {
+        config.amount = amount;
+    }
 
-    for sr in config.subreddits.into_iter() {
+    Config::print_config(&config);
+
+    for sr in config.subreddits.iter() {
         let posts: Vec<Wallpaper> =
             reddit::get_subreddit_wallpapers(&sr, &config.fetch_type, config.amount).await?;
         wallpapers.push(posts)
@@ -34,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     wallpapers.shuffle(&mut rand::thread_rng());
 
     // process wallpaper batch
-    let _batch_result = process_wallpaper_batch(wallpapers).await;
+    let _batch_result = process_wallpaper_batch(wallpapers, &config).await;
 
     Ok(())
 }

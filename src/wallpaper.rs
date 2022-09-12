@@ -16,8 +16,10 @@ pub struct Wallpaper {
     pub hash: String,
 }
 
-pub async fn process_wallpaper_batch(mut wallpapers: Vec<Wallpaper>) -> Vec<Wallpaper> {
-    let config = Config::load();
+pub async fn process_wallpaper_batch(
+    mut wallpapers: Vec<Wallpaper>,
+    config: &Config,
+) -> Vec<Wallpaper> {
     let db = database::connect()
         .await
         .expect("Error connecting to the database");
@@ -27,7 +29,7 @@ pub async fn process_wallpaper_batch(mut wallpapers: Vec<Wallpaper>) -> Vec<Wall
         .tempdir()
         .expect("Error getting tmp_dir");
     let tmp_dir = tmp_dir.path();
-    let dst_dir = config.download_dir;
+    let dst_dir = &config.download_dir;
     let mut download_count: i32 = 0;
 
     for mut wall in wallpapers.iter_mut() {

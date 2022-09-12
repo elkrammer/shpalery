@@ -71,16 +71,19 @@ impl Config {
         Ok(())
     }
 
-    pub fn print_config() {
+    pub fn print_config(&self) {
         println!(
             "\
+            {}{}\n\
             {}{}\n\
             {}{}\n\
             ",
             format!("Wallpapers Path : ").blue().bold(),
             Self::get_wallpapers_data_dir().display(),
             format!("Database Path   : ").yellow().bold(),
-            Self::get_database_file().display()
+            Self::get_database_file().display(),
+            format!("Download Total  : ").green(),
+            self.amount
         );
     }
 }
