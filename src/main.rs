@@ -24,7 +24,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         config.amount = amount;
     }
 
-    Config::print_config(&config);
+    if let Some(fetch_type) = args.fetch_type {
+        config.fetch_type = fetch_type;
+    }
+
+    if args.verbose {
+        Config::print_config(&config);
+    }
 
     for sr in config.subreddits.iter() {
         let posts: Vec<Wallpaper> =
@@ -43,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // process wallpaper batch
     let _batch_result = process_wallpaper_batch(wallpapers, &config).await;
+    println!("");
 
     Ok(())
 }

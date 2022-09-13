@@ -77,13 +77,16 @@ impl Config {
             {}{}\n\
             {}{}\n\
             {}{}\n\
+            {}{}\n\
             ",
             format!("Wallpapers Path : ").blue().bold(),
             Self::get_wallpapers_data_dir().display(),
             format!("Database Path   : ").yellow().bold(),
             Self::get_database_file().display(),
             format!("Download Total  : ").green(),
-            self.amount
+            self.amount,
+            format!("Fetch Type      : ").white(),
+            self.fetch_type,
         );
     }
 }
