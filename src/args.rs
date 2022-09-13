@@ -1,3 +1,4 @@
+use crate::lib::validate_fetch_type;
 use clap::Parser;
 
 #[derive(Debug, Parser)]
@@ -15,13 +16,12 @@ pub struct ShpaleryArgs {
 }
 
 fn fetch_type_parser(s: &str) -> Result<String, String> {
-    match &s[..] {
-        "hot" => Ok(s.to_string()),
-        "hour" => Ok(s.to_string()),
-        "week" => Ok(s.to_string()),
-        "month" => Ok(s.to_string()),
-        "year" => Ok(s.to_string()),
-        "all" => Ok(s.to_string()),
-        _ => Err("".to_string()),
+    if validate_fetch_type(s.to_string()) {
+        return Ok(s.to_string());
+    } else {
+        return Err(
+        "Invalid fetch type\nFetch Type has to be one of: hot, hour, day, week, month, year, all"
+            .to_string(),
+    );
     }
 }

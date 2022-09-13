@@ -14,3 +14,12 @@ pub fn get_file_hash(path: &PathBuf) -> Result<String, Box<dyn std::error::Error
 pub fn string_ends_with_any(s: String, suffixes: Vec<&str>) -> bool {
     return suffixes.iter().any(|&suffix| s.ends_with(suffix));
 }
+
+pub fn validate_fetch_type(s: String) -> bool {
+    let types: Vec<&str> = vec!["hot", "hour", "day", "week", "month", "year", "all"];
+    if string_ends_with_any(s, types) {
+        true
+    } else {
+        false
+    }
+}

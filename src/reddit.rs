@@ -1,5 +1,5 @@
 use crate::database;
-use crate::lib::string_ends_with_any;
+use crate::lib::{string_ends_with_any, validate_fetch_type};
 use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
@@ -16,8 +16,7 @@ pub async fn get_subreddit_wallpapers(
     let db = database::connect().await?;
     let buffer_limit = amount + 30; // get extra wallpapers in case we need to skip items
 
-    let valid_fetch_types: Vec<&str> = vec!["hot", "hour", "day", "week", "month", "year", "all"];
-    if !(string_ends_with_any(fetch_type.to_string(), valid_fetch_types)) {
+    if !validate_fetch_type(fetch_type.to_string()) {
         println!("Invalid fetch type");
         println!("Fetch Type has to be one of: hot, hour, day, week, month, year, all");
         process::exit(1);
