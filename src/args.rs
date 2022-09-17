@@ -4,7 +4,7 @@ use clap::Parser;
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
 pub struct ShpaleryArgs {
-    #[clap(short = 'a', value_parser = clap::value_parser!(i32).range(1..=200))]
+    #[clap(short = 'a', long = "amount", value_parser = clap::value_parser!(i32).range(1..=200))]
     /// Amount of Wallpapers to Download
     pub amount: Option<i32>,
     #[clap(short = 'f', long = "fetch_type", value_parser = fetch_type_parser)]

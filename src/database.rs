@@ -48,7 +48,7 @@ pub async fn insert_reddit_entry(
     wallpaper: &Wallpaper,
 ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
     let insert = sqlx::query(
-        "INSERT INTO reddit_wallpapers (id, name, href, subreddit, hash) values (?, ?, ?, ?, ?)",
+        "INSERT INTO reddit_wallpapers (id, name, href, subreddit, hash, download_date) values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
     )
     .bind(&wallpaper.id)
     .bind(&wallpaper.name)
