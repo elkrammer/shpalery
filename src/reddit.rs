@@ -1,10 +1,11 @@
-use crate::database;
-use crate::lib::{string_ends_with_any, validate_fetch_type};
-use crate::wallpaper::Wallpaper;
 use serde_json::Value;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process;
+
+use crate::database;
+use crate::lib::{string_ends_with_any, validate_fetch_type};
+use crate::wallpaper::Wallpaper;
 
 pub async fn get_subreddit_wallpapers(
     subreddit: &str,

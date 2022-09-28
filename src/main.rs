@@ -1,4 +1,3 @@
-use crate::wallpaper::Wallpaper;
 use clap::Parser;
 use rand::seq::SliceRandom;
 use std::process;
@@ -6,6 +5,7 @@ use wallpaper::process_wallpaper_batch;
 
 use crate::args::ShpaleryArgs;
 use crate::config::Config;
+use crate::wallpaper::Wallpaper;
 
 mod args;
 mod config;

@@ -1,5 +1,6 @@
-use crate::lib::validate_fetch_type;
 use clap::Parser;
+
+use crate::lib::validate_fetch_type;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
